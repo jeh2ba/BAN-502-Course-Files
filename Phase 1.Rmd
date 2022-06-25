@@ -1,0 +1,137 @@
+---
+output:
+  word_document: default
+  html_document: default
+editor_options:
+  chunk_output_type: console
+---
+# BAN 502 Course Project
+## Part 1
+### Jennifer Huffman
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(GGally)
+library(gridExtra)
+```
+
+```{r}
+ames_student <- read_csv("ames_student.csv")
+```
+```{r}
+library(skimr)
+skim(ames_student)
+```
+```{r}
+ames_student = ames_student %>% mutate_if(is.character, as.factor)
+```
+
+```{r}
+str(ames_student)
+summary(ames_student)
+```
+
+```{r}
+ggplot(ames_student, aes(x=Above_Median)) + geom_bar()
+
+ggplot(ames_student, aes(x=Above_Median, fill=MS_SubClass)) + geom_bar()
+```
+
+```{r}
+ggplot(ames_student, aes(x=Above_Median, fill=Bldg_Type)) + geom_bar()
+
+ggplot(ames_student, aes(x=Above_Median, fill=Bldg_Type)) + geom_bar(position = "dodge")
+
+ggplot(ames_student, aes(x=Bldg_Type)) + geom_bar()
+```
+
+```{r}
+ggplot(ames_student, aes(x=Above_Median, fill=MS_Zoning)) + geom_bar()
+```
+
+
+```{r}
+ggplot(ames_student, aes(x=Neighborhood, fill=Above_Median)) + geom_bar() + theme(axis.text.x = element_text(angle = 45, size = 5))
+
+ggplot(ames_student, aes(x=Neighborhood, fill=Above_Median)) + geom_bar(position = "dodge") + theme(axis.text.x = element_text(angle = 45, size = 10))
+```
+
+```{r}
+ggplot(ames_student, aes(x=Above_Median, fill=Overall_Qual)) + geom_bar()
+
+ggplot(ames_student, aes(x=Overall_Qual, fill=Above_Median)) + geom_bar() + theme(axis.text.x = element_text(angle=45))
+```
+
+```{r}
+ggplot(ames_student, aes(x=Year_Sold, fill=Above_Median)) + geom_bar(position = "dodge")
+```
+
+```{r}
+ggplot(ames_student, aes(x=Sale_Condition, fill=Above_Median)) + geom_bar(position = "dodge")
+```
+
+```{r}
+ggplot(ames_student, aes(x=Sale_Type, fill=Above_Median)) + geom_bar(position = "dodge")
+```
+
+```{r}
+ggpairs(ames_student, columns = c("MS_Zoning", "Street", "Alley", "Lot_Shape", "Land_Contour", "Utilities", "Above_Median"))
+
+ggpairs(ames_student, columns = c("Lot_Config", "Land_Slope", "Condition_1", "Condition_2", "Bldg_Type", "House_Style", "Above_Median"))
+
+ggpairs(ames_student, columns = c("Overall_Qual", "Overall_Cond", "Roof_Style", "Roof_Matl", "Mas_Vnr_Type", "Above_Median"))
+
+ggpairs(ames_student, columns = c("Exter_Qual", "Exter_Cond", "Foundation", "Bsmt_Qual", "Bsmt_Cond", "Bsmt_Exposure", "Above_Median"))
+
+```
+
+```{r}
+ggpairs(ames_student, columns = c("Overall_Qual", "Overall_Cond", "Exter_Qual", "Exter_Cond", "Above_Median"))
+
+ggpairs(ames_student, columns = c("Lot_Area", "Year_Built", "TotRms_AbvGrd", "Year_Sold", "Above_Median"))
+```
+
+```{r}
+ames_lotrmv = ames_student %>% filter(Lot_Area < 40000)
+```
+
+
+```{r}
+g1 = ggplot(ames_student, aes(x=Above_Median, y=Year_Sold)) + geom_boxplot()
+
+g2 = ggplot(ames_student, aes(x=Above_Median, y=Year_Built)) + geom_boxplot()
+
+g3 = ggplot(ames_student, aes(x=Above_Median, y=TotRms_AbvGrd)) + geom_boxplot()
+
+g4 = ggplot(ames_lotrmv, aes(x=Above_Median, y=Lot_Area)) + geom_boxplot()
+
+grid.arrange(g1,g2,g3,g4)
+```
+
+```{r}
+ggplot(ames_student, aes(x=Above_Median, fill=Utilities)) + geom_bar()
+```
+
+```{r}
+g5 = ggplot(ames_student, aes(x=Above_Median, y=Gr_Liv_Area)) + geom_boxplot()
+
+g6 = ggplot(ames_student, aes(x=Above_Median, y=Bedroom_AbvGr)) + geom_boxplot()
+
+g7 = ggplot(ames_student, aes(x=Above_Median, y=Total_Bsmt_SF)) + geom_boxplot()
+
+g8 = ggplot(ames_student, aes(x=Above_Median, fill=Garage_Type)) + geom_bar()
+
+grid.arrange(g5,g6,g7,g8)
+```
+
+```{r}
+ggplot(ames_student, aes(x=Above_Median, fill = Lot_Config)) + geom_bar()
+```
+
+```{r}
+ggplot(ames_student, aes(x=Above_Median, fill=Overall_Cond)) + geom_bar()
+
+ggplot(ames_student, aes(x=Above_Median, fill=Exter_Cond)) + geom_bar()
+```
+

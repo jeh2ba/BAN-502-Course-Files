@@ -1,0 +1,159 @@
+# Clustering Assignment
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(cluster)
+library(factoextra)
+library(dendextend)
+```
+
+```{r}
+trucks <- read_csv("trucks-1.csv")
+```
+
+```{r}
+ggplot(trucks, aes(x=Distance, y=Speeding)) +
+  geom_point()
+```
+
+Question 1 - The data points are arranged in what appear to be four clusters.
+
+```{r}
+trucks_scaled = scale(trucks)
+summary(trucks_scaled)
+```
+
+Question 2 - The maximum value of distance in the scaled data set is 3.1560.
+
+```{r}
+kmeans_recipe = recipe(~ Distance + Speeding, trucks) 
+
+trucks_dummy = kmeans_recipe %>% 
+  step_scale(all_numeric()) %>%
+  step_center(all_numeric()) 
+
+trucks_dummy = prep(trucks_dummy, trucks) #prepares the recipe
+
+trucks_cleaned = bake(trucks_dummy, trucks)
+```
+
+```{r}
+set.seed(64)
+clusts = 
+  tibble(k = 2) %>%
+  mutate(
+    kclust = map(k, ~kmeans(trucks_cleaned, .x)),
+    tidied = map(kclust, tidy),
+    glanced = map(kclust, glance),
+    augmented = map(kclust, augment, trucks_cleaned)
+  )
+
+clusts
+```
+
+```{r}
+clusters = 
+  clusts %>%
+  unnest(cols = c(tidied))
+
+assignments = 
+  clusts %>% 
+  unnest(cols = c(augmented))
+
+clusterings = 
+  clusts %>%
+  unnest(cols = c(glanced))
+```
+
+```{r}
+set.seed(64)
+clusters = kmeans(trucks_cleaned, 2)
+
+trucks = augment(clusters, trucks)
+str(trucks)
+```
+
+```{r}
+ggplot(trucks, aes(x=Distance, y=Speeding, color=factor(.cluster))) + geom_point()
+```
+
+Question 3 - Drivers with longer distances are in one cluster and drives with shorter distances are in another.
+
+```{r}
+set.seed(412)
+clusts2 = 
+  tibble(k = 1:8) %>%
+  mutate(
+    kclust = map(k, ~kmeans(trucks_cleaned, .x)),
+    tidied = map(kclust, tidy),
+    glanced = map(kclust, glance),
+    augmented = map(kclust, augment, trucks_cleaned)
+  )
+
+clusts2
+```
+
+```{r}
+clusters2 = 
+  clusts2 %>%
+  unnest(cols = c(tidied))
+
+assignments2 = 
+  clusts2 %>% 
+  unnest(cols = c(augmented))
+
+clusterings2 = 
+  clusts2 %>%
+  unnest(cols = c(glanced))
+```
+
+```{r}
+p1 = 
+  ggplot(assignments2, aes(x = Distance, y = Speeding)) +
+  geom_point(aes(color = .cluster), alpha = 0.8) + 
+  facet_wrap(~ k)
+p1
+```
+
+```{r}
+ggplot(clusterings2, aes(k, tot.withinss)) +
+  geom_line() +
+  geom_point()
+```
+
+Question 4 - A k of 4 is most appropriate.
+Question 5 - A k of 4 is most apprpriate.
+
+```{r}
+set.seed(64)
+clusters = kmeans(trucks_cleaned, 4)
+
+trucks = augment(clusters, trucks)
+str(trucks)
+```
+
+```{r}
+p2 = 
+  ggplot(assignments2, aes(x = Distance, y = Speeding)) +
+  geom_point(aes(color = .cluster), alpha = 0.8) + 
+  facet_wrap(~ k)
+p2
+```
+
+```{r}
+clust_trucks = kmeans(trucks_cleaned, centers = 4)
+
+clust_trucks
+```
+
+```{r}
+trucks = augment(clust_trucks, trucks)
+head(trucks)
+```
+
+```{r}
+ggplot(trucks, aes(x=Distance, y=Speeding, color=factor(.cluster))) + geom_point()
+```
+
+Question 6 - Short & Low, Long & High, Long & Low, Short & High (all of the above)
